@@ -1,12 +1,5 @@
 import React, { createContext, useReducer } from 'react'
-import axios from 'axios'
 
-const ACTIONS = {
-    ADD_ITEM: "add-item",
-    DELETE_ITEM: "delete-item",
-    EDIT_ITEM: "edit-item",
-    FETCH_DATA: "fetch-data"
-}
 const initState = []
 
 export const ItemContext = createContext(initState)
@@ -15,39 +8,25 @@ function reducer(state, action) {
     let { type, payload } = action;
 
     switch (type) {
-        case ACTIONS.FETCH_DATA: {
+        case "fetch-data": {
             return [...payload.items]
         }
-        case ACTIONS.ADD_ITEM: {
-            const { newitem } = payload;
-            async function postNewItem() {
-                try {
-                    const response = await axios.post("/api/post", { title: newitem })
-                    const { id, title } = response.data
-                    return [...state, { id: id, title: title }]
-                } catch (error) {
-                    console.log(error)
-                }
-            }
+        case "add-item": {
+            const { newItem } = payload;
 
-            postNewItem()
+            return [...state, newItem]
+
+
         }
-        case ACTIONS.DELETE_ITEM: {
-            const { id } = payload
-            async function deleteItem() {
-                try {
-                    const response = await axios.delete(`/api/delete/${id}`)
-                    return state.filter(item => item.id !== id)
-                } catch (error) {
-                    console.log(error)
-                }
-            }
-            deleteItem()
+        case "delete-item": {
+            const { id } = payload;
+            return state.filter((item) => item.id !== id)
         }
-        case ACTIONS.EDIT_ITEM: {
+        case "edit-item": {
+            let { id, title } = payload;
             return state.map(item => {
-                if (item.id === payload.id) {
-                    return { ...item, title: payload.title }
+                if (item.id === id) {
+                    return { ...item, title: title }
                 }
                 return item;
             })
