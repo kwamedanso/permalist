@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react'
+import axios from 'axios';
 import { GoPencil } from "react-icons/go";
 import { FaCheck } from "react-icons/fa";
 import { ItemContext } from './ItemListContext';
@@ -8,16 +9,40 @@ export default function Item({ id, title }) {
     const [input, setInput] = useState(title)
     const { dispatch } = useContext(ItemContext);
 
-    function editInput(e, id, input) {
+    async function editInput(e, id, input) {
         e.preventDefault();
-        dispatch({ type: "edit-item", payload: { id, title: input } })
-        setIsEditing(false)
+        try {
+            const response = await axios.post("/api/post/edit", { id: id, title: input })
+            if (response.status !== 200) {
+                throw new Error(`HTTP Error: ${response.status}`)
+            }
+            const { id: itemId, title: newTitle } = response.data.item
+            dispatch({ type: "edit-item", payload: { id: itemId, title: newTitle } })
+            setIsEditing(false)
+        } catch (error) {
+
+        }
     }
 
-    function deleteItem(e, id) {
-        if (e.target.checked) {
-            dispatch({ type: "delete-item", payload: { id } })
-            return;
+    async function deleteItem(e, id) {
+        const isChecked = e.target.checked;
+
+        if (isChecked) {
+
+            try {
+                const response = await axios.delete(`/api/delete/${id}`)
+                if (response.status !== 200) {
+                    throw new Error(`HTTP Error! Status: ${response.status}`)
+                }
+
+                let itemId = response.data.deletedItem.id;
+                dispatch({ type: "delete-item", payload: { id: itemId } })
+
+
+
+            } catch (error) {
+                console.error(error)
+            }
         }
     }
 
