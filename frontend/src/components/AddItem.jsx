@@ -1,5 +1,6 @@
 import React, { useState, useRef, useContext } from 'react'
 import { ItemContext } from './ItemListContext';
+import axios from 'axios';
 
 export default function AddItem() {
     const [input, setInput] = useState("")
@@ -7,14 +8,25 @@ export default function AddItem() {
     const inputRef = useRef(null);
 
 
-    function addNewItem(e) {
+    async function addNewItem(e) {
         e.preventDefault();
-        dispatch({ type: "add-item", payload: { newitem: input } })
-        setInput("")
-        inputRef.current.focus()
+
+        try {
+            const response = await axios.post("/api/post/new", { title: input })
+            if (response.status !== 200) {
+                throw new Error(`HTTP Error! Status: ${response.status}`)
+            }
+            dispatch({ type: "add-item", payload: { newItem: response.data.item } })
+            setInput("")
+            inputRef.current.focus()
+
+        } catch (error) {
+            console.log("Error: ", error)
+        }
     }
     return (
         <form onSubmit={addNewItem}>
+
             <input
                 type="text"
                 placeholder="New Item"
