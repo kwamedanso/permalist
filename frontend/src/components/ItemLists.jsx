@@ -9,11 +9,10 @@ export default function ItemLists() {
     useEffect(() => {
 
         async function getData() {
-            const response = await axios.get("/api");
+            const response = await axios.get("/api/all");
             const json = await response.data;
             dispatch({ type: "fetch-data", payload: { items: json } })
         }
-
         getData()
     }, [])
 
